@@ -35,18 +35,35 @@
         /* Form Styling */
         .contact-section { background: #eee; padding: 60px 20px; margin-top: 50px; }
         form { max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; text-align: left; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
-        .submit-btn { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+        .submit-btn { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
         .submit-btn:hover { background: var(--dark); }
+        .submit-btn:disabled { background: #999; cursor: not-allowed; }
+
+        /* Enhanced Success Card */
+        #success-card {
+            display: none;
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 5px solid #4CAF50;
+            animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .check-icon { font-size: 50px; color: #4CAF50; margin-bottom: 20px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <header id="main-header">
-        <img src="android-chrome-512x512.png" alt="Logo" class="logo">
-        <h1 style="letter-spacing: 4px; text-transform: uppercase;">Dream Ladders</h1>
+        <img src="android-chrome-512x512.png" alt="Dream Ladders Logo" class="logo">
+        <h1 style="letter-spacing: 4px; text-transform: uppercase; margin: 0;">Dream Ladders</h1>
         <p style="font-style: italic; opacity: 0.9;">Where Design Meets Destiny</p>
     </header>
 
@@ -81,12 +98,12 @@
             <h2 style="color: #25D366;">Music Production & Scoring</h2>
             <p>Professional sound design and sonic foundations for your brand.</p>
             <audio id="demo-player" src="assets/audio/your-demo.mp3"></audio>
-            <button onclick="toggleMusic()" id="music-btn" style="padding: 10px 20px; border-radius: 30px; cursor: pointer;">▶ Listen to Demo</button>
+            <button onclick="toggleMusic()" id="music-btn" style="padding: 10px 20px; border-radius: 30px; cursor: pointer; border: 1px solid #ddd; background: white;">▶ Listen to Demo</button>
         </div>
     </div>
 
     <section class="contact-section">
-        <form action="https://formspree.io/f/YOUR_UNIQUE_ID" method="POST">
+        <form id="dream-ladders-form">
             <h2 style="text-align: center;">Build Your Destiny</h2>
             <input type="text" name="name" placeholder="Full Name" required>
             <input type="email" name="email" placeholder="Email Address" required>
@@ -97,13 +114,48 @@
                 <option value="Music">Music Production</option>
             </select>
             <textarea name="message" rows="4" placeholder="Describe your vision..."></textarea>
-            <button type="submit" class="submit-btn">Get Free Consultation</button>
+            <button type="submit" class="submit-btn" id="submit-btn">Get Free Consultation</button>
         </form>
-        <p style="text-align: center; font-size: 0.7rem; color: #4CAF50; margin-top: 30px;">● System Status: Automation APIs Operational</p>
+
+        <div id="success-card">
+            <div class="check-icon">✔</div>
+            <h2 style="color: var(--primary); margin-bottom: 10px;">Foundation Established!</h2>
+            <p>Your vision has been recorded in our secure ledger. A Dream Ladders consultant will reach out to you within 24 hours.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <button onclick="window.location.reload()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Send Another Request</button>
+        </div>
+
+        <p style="text-align: center; font-size: 0.7rem; color: #4CAF50; margin-top: 30px;">● System Status: Google Ledger Connected</p>
     </section>
 
     <script>
-        // Tab Switcher
+        // --- 1. GOOGLE SHEETS INTEGRATION ---
+        // REPLACE THE URL BELOW WITH YOUR WEB APP URL FROM GOOGLE APPS SCRIPT
+        const scriptURL = 'PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE'; 
+        const form = document.getElementById('dream-ladders-form');
+        const btn = document.getElementById('submit-btn');
+        const successCard = document.getElementById('success-card');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            btn.disabled = true;
+            btn.innerHTML = "Recording to Ledger...";
+            
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    form.style.display = "none";
+                    successCard.style.display = "block";
+                    document.querySelector('.contact-section').scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    btn.disabled = false;
+                    btn.innerHTML = "Retry Submission";
+                    alert("Submission failed. Check your internet or Script URL.");
+                });
+        });
+
+        // --- 2. TABS LOGIC ---
         function openTab(evt, name) {
             var i, x, tablinks;
             x = document.getElementsByClassName("service-box");
@@ -114,7 +166,7 @@
             evt.currentTarget.className += " active";
         }
 
-        // Interactive Header
+        // --- 3. INTERACTIVE HEADER ---
         document.addEventListener('mousemove', (e) => {
             const header = document.getElementById('main-header');
             const x = e.clientX / window.innerWidth;
@@ -122,7 +174,7 @@
             header.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, #1b3a5d 0%, #0d1b2a 70%)`;
         });
 
-        // Audio Logic
+        // --- 4. AUDIO PLAYER ---
         var audio = document.getElementById("demo-player");
         function toggleMusic() {
             if (audio.paused) { audio.play(); document.getElementById("music-btn").innerHTML = "⏸ Pause Demo"; }
